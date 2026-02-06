@@ -1,73 +1,71 @@
 # Documentación final
 
-# Memoria Final: Administración de FileZilla Server
-
 ---
 
 ### 1. Instalación del Servidor
-Para la puesta en marcha, se descargó el instalador de **FileZilla Server para Linux (64bit x86)** desde la web oficial. Una vez instalado, se procedió a registrar el servicio en el sistema operativo para asegurar su disponibilidad.
+Para poner en marcha el servicio, descargué el instalador oficial de **FileZilla Server para Linux (64bit x86)**. Una vez finalizada la instalación, procedí a registrar el demonio en mi sistema operativo para asegurar que estuviera siempre disponible.
 
-* **Comando de habilitación:** `sudo systemctl enable filezilla-server`
-* **Comando de verificación:** `systemctl status filezilla-server` (confirmando el estado *active/running*)
+* **Habilitación del servicio:** Ejecuté `sudo systemctl enable filezilla-server` para que arranque automáticamente con el sistema.
+* **Verificación:** Comprobé con el comando `systemctl status filezilla-server` que el estado aparecía correctamente como *active (running)*.
 
 ---
 
 ### 2. Configuración Básica
-La configuración inicial se realizó a través de la interfaz de administración, estableciendo los parámetros de escucha necesarios para permitir conexiones externas.
+Realicé la configuración inicial a través de la interfaz de administración, donde establecí los parámetros necesarios para que el servidor aceptara conexiones externas.
 
-* **Server Listeners:** Se configuró la escucha en la dirección IP `0.0.0.0` (todas las interfaces) a través del **puerto 21**.
-* **Protocolo:** Se estableció como requisito el uso de **Explicit FTP over TLS** para proteger las credenciales desde el primer contacto.
+* **Server Listeners:** Configuré la escucha en la dirección IP `0.0.0.0` para aceptar peticiones desde cualquier interfaz a través del **puerto 21**.
+* **Protocolo:** Establecí como requisito obligatorio el uso de **Explicit FTP over TLS**, garantizando así la protección de mis credenciales desde el primer contacto.
 
 ---
 
 ### 3. Usuarios y Permisos
-Se implementó una estructura basada en grupos para simplificar la administración y asegurar la jerarquía de accesos.
+Diseñé una estructura basada en grupos para gestionar los accesos de forma más eficiente y organizada.
 
-* **Grupos:** Se creó el **"Grupo1"** con un límite de velocidad de **1000 KiB/s** y acceso de lectura/escritura sobre el directorio `/home`.
-* **Usuarios:** Se crearon las cuentas **"Usuario1"**, **"Usuario2"** y **"tester"**, asociándolas al grupo para heredar automáticamente sus restricciones.
-* **Acceso Anónimo:** Se habilitó un usuario `anonymous` sin contraseña, limitado estrictamente a **Modo Lectura** para descargas públicas.
+* **Gestión de Grupos:** Creé el **"Grupo1"**, al cual asigné un límite de velocidad de **1000 KiB/s** y permisos de lectura/escritura sobre mi directorio `/home`.
+* **Cuentas de Usuario:** Creé los usuarios **"Usuario1"**, **"Usuario2"** y **"tester"**, integrándolos en el grupo anterior para que heredaran todas sus restricciones automáticamente.
+* **Acceso Anónimo:** Habilité la cuenta `anonymous` sin requerir contraseña, pero limitando su acceso estrictamente a **Modo Lectura** para permitir descargas públicas seguras.
 
 ---
 
 ### 4. Seguridad (FTPS)
-Para garantizar la privacidad de los datos, se configuró una capa de seguridad mediante **FTPS Explícito**.
+Para proteger la privacidad de mis archivos y datos, configuré una capa de seguridad mediante **FTPS Explícito**.
 
-* **Certificado:** Se generó un certificado X.509 autofirmado con algoritmo **EC/ECDSA de 256 bits**.
-* **Política:** Se configuró el servidor para rechazar cualquier conexión que no utilice cifrado **TLS 1.3**, protegiendo así el canal de datos con **AES-256-GCM**.
+* **Certificado:** Generé mi propio certificado X.509 autofirmado utilizando un algoritmo moderno **EC/ECDSA de 256 bits**.
+* **Directivas:** Configuré el servidor para rechazar conexiones inseguras, obligando al uso de **TLS 1.3** y cifrado **AES-256-GCM** para el canal de datos.
 
 ---
 
 ### 5. Modos Activo y Pasivo
-Se analizaron ambos métodos de transferencia para asegurar la compatibilidad con firewalls y redes NAT.
+Analicé ambos métodos de transferencia para entender cómo se comportan frente a firewalls y redes con NAT.
 
-* **Modo Activo:** El servidor inicia la conexión de datos (puerto 20). Suele fallar si el cliente tiene un firewall restrictivo.
-* **Modo Pasivo:** El cliente inicia la conexión. Se configuró en el servidor el rango de puertos **50000-50100** para facilitar este modo, que es el estándar recomendado en redes modernas.
+* **Modo Activo:** Comprobé que el servidor inicia la conexión de datos (puerto 20), lo cual suele dar problemas si el firewall de mi cliente es muy restrictivo.
+* **Modo Pasivo:** Es el que he dejado configurado como estándar. Definí un rango de puertos entre el **50000 y el 50100** en el servidor para facilitar que el cliente inicie la conexión, que es lo ideal en redes modernas.
 
 
 
 ---
 
 ### 6. Clientes Utilizados
-La funcionalidad del servidor se validó mediante tres tipos de clientes:
+Validé el funcionamiento de mi servidor probando tres tipos de clientes diferentes:
 
-* **CLI (lftp):** Ideal para automatización y entornos sin interfaz gráfica. Permite gestionar el cifrado TLS mediante comandos manuales.
-* **Gráfico (FileZilla Client):** Utilizado para transferencias masivas y gestión visual de archivos mediante el "Gestor de Sitios".
-* **Navegador Web:** Se comprobó que los navegadores modernos (como Firefox) ya no soportan FTP nativo, actuando únicamente como lanzadores de aplicaciones externas.
+* **CLI (lftp):** Lo utilicé para realizar pruebas desde la terminal. Me resultó muy útil para gestionar el cifrado TLS mediante comandos manuales.
+* **Interfaz Gráfica (FileZilla Client):** Fue mi herramienta principal para transferencias masivas, aprovechando el "Gestor de Sitios" para guardar mi conexión.
+* **Navegador Web:** Pude verificar que navegadores como Firefox ya no soportan FTP de forma nativa, funcionando ahora solo como un enlace para abrir aplicaciones externas.
 
 ---
 
 ### 7. Integración Web
-Se demostró la capacidad de FileZilla como herramienta de despliegue de contenidos.
+Logré integrar el servidor FTP con mi servidor web para facilitar el despliegue de contenidos.
 
-* **Flujo:** Se vinculó el directorio raíz del usuario FTP con el **DocumentRoot** de Apache (`/var/www/html`).
-* **Resultado:** Al subir un archivo `prueba.html` vía FTP, este quedó disponible inmediatamente para el público a través del protocolo HTTP.
+* **Flujo de trabajo:** Vinculé el directorio raíz de mi usuario FTP directamente con el **DocumentRoot** de Apache (`/var/www/html`).
+* **Resultado:** Pude comprobar que, al subir mi archivo `prueba.html` vía FTP, este se publicaba instantáneamente y era accesible a través de HTTP en el navegador.
 
 ---
 
-### 8. Recomendaciones de Administración
-Tras las pruebas realizadas, se sugieren las siguientes pautas para la gestión del servidor:
+### 8. Mis Recomendaciones de Administración
+Tras completar todas las pruebas, he extraído estas pautas clave para gestionar el servidor:
 
-* **Monitorización:** Revisar los logs de FileZilla para identificar intentos de acceso fallidos o errores de conexión TLS.
-* **Mantenimiento de Permisos:** Utilizar siempre permisos de grupo para evitar inconsistencias entre usuarios que desempeñan la misma función.
-* **Seguridad:** Mantener el rango de puertos pasivos lo más estrecho posible y renovar periódicamente los certificados TLS.
-* **Optimización:** Establecer límites de ancho de banda (KiB/s) para evitar que un solo usuario sature la conexión de red del servidor.
+* **Monitorización constante:** Recomiendo revisar los logs de FileZilla con frecuencia para detectar intentos de acceso no autorizados.
+* **Uso de grupos:** Es fundamental trabajar con permisos de grupo para mantener la consistencia y evitar errores al crear nuevos usuarios.
+* **Seguridad activa:** Conviene mantener el rango de puertos pasivos ajustado y renovar los certificados TLS periódicamente.
+* **Control de tráfico:** Establecer límites de ancho de banda es vital para evitar que un solo usuario consuma todos los recursos de red de mi servidor.
